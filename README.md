@@ -1,11 +1,11 @@
-# 🤖 Obsidian RAG搭載 AIチャットボット
+# 🤖 株式会社AYMEN RAG搭載 AIチャットボット
 
-LangChain + LlamaIndexを組み合わせたハイブリッドRAGシステムにより、個人のObsidian日記データを参照可能なAIチャットボットです。
+LangChain + LlamaIndexを組み合わせたハイブリッドRAGシステムにより、会社の文書データを参照可能なAIチャットボットです。
 
 ## 🎯 機能
 
-- **インテリジェント・ルーティング**: 一般的な対話と日記検索を自動判断
-- **日記検索**: Obsidianの日記ファイルから関連情報を検索・要約
+- **インテリジェント・ルーティング**: 一般的な対話と会社文書検索を自動判断
+- **会社文書検索**: 会社の業務文書やマニュアルから関連情報を検索・要約
 - **自然な対話**: 親しみやすいAIアシスタントとしての応答
 - **メモリ機能**: 直近の会話履歴を記憶
 
@@ -14,10 +14,8 @@ LangChain + LlamaIndexを組み合わせたハイブリッドRAGシステムに�
 ```
 .
 ├── main.py              # エントリポイント（LangChain Agent）
-├── engine/
-│   └── rag_engine.py    # LlamaIndex検索ロジック
-├── config/
-│   └── settings.py      # 設定管理
+├── rag_engine.py        # LlamaIndex検索ロジック
+├── settings.py          # 設定管理
 ├── .env                 # APIキー設定
 ├── requirements.txt     # 依存ライブラリ
 └── README.md           # このファイル
@@ -37,7 +35,7 @@ pip install -r requirements.txt
 
 ```env
 OPENROUTER_API_KEY=your_openrouter_api_key_here
-DIARY_PATH=/Users/yoshinomukanou/Documents/Obsidian Vault/日記
+DOCS_PATH=/path/to/your/company/documents
 MODEL_NAME=openai/gpt-4o-mini
 ```
 
@@ -55,13 +53,13 @@ User: こんにちは！
 Bot: こんにちは！何かお手伝いできることはありますか？
 ```
 
-### 日記検索
+### 会社文書検索
 ```
-User: 先月はどんなことがあった？
-Bot: （日記から関連情報を検索して回答）
+User: 会社の休暇制度について教えて
+Bot: （会社文書から関連情報を検索して回答）
 
-User: 2025年12月22日の日記を教えて
-Bot: （該当日の日記内容を要約して回答）
+User: プロジェクトの進捗管理方法は？
+Bot: （該当する業務マニュアルを要約して回答）
 ```
 
 ### 終了
@@ -90,12 +88,12 @@ User質問 → LangChain分類 → ルーティング
 ```
 
 ### データソース
-- **対象**: `/Users/yoshinomukanou/Documents/Obsidian Vault/日記`内の`.md`ファイル
+- **対象**: 会社の文書ディレクトリ内の各種ファイル
 - **処理**: 起動時に全ファイルをスキャンしてベクトルインデックス構築
 
 ### 質問分類ロジック
-- **RAG処理**: 過去の出来事、日付指定、感情・思考、日記内容
-- **一般対話**: 挨拶、雑談、一般知識、現在・未来の質問
+- **RAG処理**: 会社業務、制度、マニュアル、プロジェクト情報
+- **一般対話**: 挨拶、雑談、一般知識、その他の質問
 
 ### LLM設定の最適化
 - **分類用**: temperature=0.1（一貫性重視）
@@ -105,7 +103,7 @@ User質問 → LangChain分類 → ルーティング
 ## ⚠️ 注意事項
 
 1. **APIキー**: OpenRouterのAPIキーが必要
-2. **データパス**: Obsidianの日記パスが正しく設定されている必要あり
+2. **データパス**: 会社文書のパスが正しく設定されている必要あり
 3. **ネットワーク**: インターネット接続必須（OpenRouter API使用のため）
 
 ## 🔍 トラブルシューティング
@@ -116,8 +114,8 @@ User質問 → LangChain分類 → ルーティング
 ```
 → `.env`ファイルでAPIキーを設定してください
 
-### 日記パスエラー
+### 文書パスエラー
 ```
-エラー: 日記パスが見つかりません
+エラー: 文書パスが見つかりません
 ```
-→ `.env`ファイルでDIARY_PATHを正しいパスに設定してください
+→ `.env`ファイルでDOCS_PATHを正しいパスに設定してください
