@@ -14,7 +14,7 @@ class Settings:
     MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
     
     # データパス
-    DIARY_PATH = os.getenv("DIARY_PATH", "/Users/yoshinomukanou/Documents/Obsidian Vault/株式会社AYMEN")
+    DOCS_PATH = os.getenv("DOCS_PATH", "/Users/yoshinomukanou/Downloads/国交省に関するデータ")
     
     # OpenRouterのベースURL
     OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -26,9 +26,9 @@ class Settings:
             print("エラー: OPENROUTER_API_KEYが設定されていません")
             return False
         
-        diary_path = Path(cls.DIARY_PATH)
-        if not diary_path.exists() or not diary_path.is_dir():
-            print(f"エラー: データパスが見つかりません: {cls.DIARY_PATH}")
+        docs_path = Path(cls.DOCS_PATH)
+        if not docs_path.exists() or not docs_path.is_dir():
+            print(f"エラー: データパスが見つかりません: {cls.DOCS_PATH}")
             return False
         
         return True
@@ -38,6 +38,6 @@ class Settings:
         """設定情報を表示（APIキーは隠す）"""
         print("=== 設定情報 ===")
         print(f"モデル: {cls.MODEL_NAME}")
-        print(f"データパス: {cls.DIARY_PATH}")
+        print(f"データパス: {cls.DOCS_PATH}")
         print(f"APIキー: {'設定済み' if cls.OPENROUTER_API_KEY else '未設定'}")
         print("===============")

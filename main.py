@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-株式会社AYMEN Obsidian RAG搭載 AIチャットボット
+国土交通省データ RAG搭載 AIチャットボット
 LangChain + LlamaIndexによるハイブリッドRAGシステム
 """
 
@@ -8,11 +8,11 @@ import sys
 from typing import Dict, Any
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from engine.rag_engine import RAGEngine
-from config.settings import Settings
+from rag_engine import RAGEngine
+from settings import Settings
 
-class CompanyBot:
-    """LangChain（判定・ルーティング） + LlamaIndex（RAG）ハイブリッドボット - 会社情報専用"""
+class MlitBot:
+    """LangChain（判定・ルーティング） + LlamaIndex（RAG）ハイブリッドボット - 国交省データ専用"""
     
     def __init__(self):
         """チャットボットを初期化"""
@@ -55,19 +55,19 @@ class CompanyBot:
 以下の基準で判定してください：
 
 【RAG】- 以下の場合は「RAG」と回答：
-- 会社の事業内容について質問している
-- 役員報酬や給与について聞いている
-- クレジットカードや経費について質問している
-- 理念や経営方針について聞いている
-- 会社の業務や制度に関する質問
-- 株式会社AYMENに関連する質問
+- 国交省の政策について質問している
+- インフラやプロジェクトについて聞いている
+- 法令や制度について質問している
+- 交通や国土計画について聞いている
+- 国土交通行政に関する質問
+- 国土交通省に関連する質問
 
 【GENERAL】- 以下の場合は「GENERAL」と回答：
 - 挨拶やあいさつ
 - 一般的な知識や情報を求めている
 - 雑談や世間話
 - 現在や未来に関する質問
-- 会社とは無関係な質問
+- 国交省とは無関係な質問
 
 「RAG」または「GENERAL」のどちらかのみを回答してください。"""),
                 ("human", "{question}")
@@ -100,7 +100,7 @@ class CompanyBot:
     
     def initialize(self) -> bool:
         """チャットボットの初期化"""
-        print("🤖 株式会社AYMEN情報チャットボットを起動中...")
+        print("🤖 国土交通省データチャットボットを起動中...")
         
         # 設定の検証
         if not Settings.validate_settings():
@@ -142,12 +142,16 @@ class CompanyBot:
                 # 2. 分類結果に基づいてルーティング
                 if classification == "RAG" and self.rag_engine.is_ready():
                     # LlamaIndexでRAG処理
+                    # rag_engineというインスタンス(main.pyの中）のanswer_with_ragメソッドを呼び出している
+                    # インスタンス.メソッド（）
                     response = self.rag_engine.answer_with_rag(user_input)
                     print(f"\nBot (RAG): {response}")
                     
                     # デバッグ: どの文書が参照されたかを表示
+                    # このstartswithは外部のメソッド
                     if user_input.startswith("debug:"):
                         debug_query = user_input[6:].strip()
+                        # 
                         retrieval_info = self.rag_engine.get_retrieval_info(debug_query)
                         print(f"\n🔍 検索情報:")
                         for source in retrieval_info.get("sources", []):
@@ -167,7 +171,7 @@ class CompanyBot:
 
 def main():
     """メイン関数"""
-    bot = CompanyBot()
+    bot = MlitBot()
     
     if not bot.initialize():
         print("チャットボットの初期化に失敗しました。")

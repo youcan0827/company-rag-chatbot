@@ -6,7 +6,7 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
-from config.settings import Settings as AppSettings
+from settings import Settings as AppSettings
 
 class RAGEngine:
     """LlamaIndexを使用した完全なRAGシステム（検索 + 生成）"""
@@ -36,30 +36,30 @@ class RAGEngine:
             model="text-embedding-3-small"
         )
         
-        # チャンク分割の設定（日記に最適化）
+        # チャンク分割の設定（PDF文書に最適化）
         self.node_parser = SentenceSplitter(
-            chunk_size=512,  # 日記の段落程度のサイズ
-            chunk_overlap=50,  # 文脈保持のためのオーバーラップ
+            chunk_size=1024,  # PDF文書の段落程度のサイズ
+            chunk_overlap=100,  # 文脈保持のためのオーバーラップ
             separator="\n\n",  # 段落区切りを優先
         )
         Settings.node_parser = self.node_parser
     
     def load_documents(self) -> bool:
-        """日記ファイルを読み込んでインデックスを構築（メタデータ付き）"""
+        """国交省PDFファイルを読み込んでインデックスを構築（メタデータ付き）"""
         try:
-            print("📖 Obsidianファイルを読み込み中...")
+            print("📖 国交省PDFファイルを読み込み中...")
             
-            # Markdownファイルのみを読み込み
+            # PDFファイルのみを読み込み
             reader = SimpleDirectoryReader(
-                input_dir=AppSettings.DIARY_PATH,
-                required_exts=[".md"],
+                input_dir=AppSettings.DOCS_PATH,
+                required_exts=[".pdf"],
                 recursive=True
             )
             
             raw_documents = reader.load_data()
             
             if not raw_documents:
-                print(f"警告: {AppSettings.DIARY_PATH} にMarkdownファイルが見つかりません")
+                print(f"警告: {AppSettings.DOCS_PATH} にPDFファイルが見つかりません")
                 return False
             
             print(f"📄 読み込んだファイル数: {len(raw_documents)}")
@@ -91,6 +91,8 @@ class RAGEngine:
             )
             
             # クエリエンジンを作成（RAG特化設定）
+            # 多分これが呼び出されいているんだろうけど、いまいち理解できてない
+            # これはRAGEngineのものではなく、RetrieverQueryEngineのクラスの中身らしい
             self.query_engine = self.index.as_query_engine(
                 similarity_top_k=8,  # より多くの関連文書を検索
                 response_mode="tree_summarize",  # 複数文書を効率的に要約
@@ -116,7 +118,7 @@ class RAGEngine:
             
             # LlamaIndexがドキュメント検索と回答生成を一括処理
             enhanced_query = f"""
-            Obsidianの知識ベースから以下の質問に回答してください：
+            国土交通省の文書データから以下の質問に回答してください：
 
             質問: {query}
 
@@ -125,9 +127,13 @@ class RAGEngine:
             - 具体的な内容や詳細を含める
             - 複数の文書にまたがる情報があれば統合して回答する
             - ソースとなる文書名を可能な限り示す
-            - 会社の業務や経営に関する情報として適切にまとめる
+            - 国交省の政策や制度、データとして適切に要約・解釈する
             """
             
+            # ここで強化されたクエリを使用してベクトルスコアの高い文書を抽出、さらに回答も生成
+            # これってどこのなにを使っているのか？
+            # .queryの1行が実行されると、検索、後処理、回答合成を行っている
+            # query_engineのインスタンスにおけるqueryメソッドを呼び出している←外部のメソッドを呼び出している
             response = self.query_engine.query(enhanced_query)
             
             print("✅ RAG処理完了")
